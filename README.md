@@ -1,0 +1,2 @@
+# Proyecto-CORTEX-Equipo-Visagismo
+Este proyecto se basara en la programacion de un asistente, el cual tomara las medidas del rostro para calcular que corte de cabello sera el mas adecuado para el, este tomara en cuenta tambien el tipo de cabello, para un mejor resultado. Este metodo facilitara al cliente dejarse recomendar un corte de cabello, adecuado a su tipo de rostro.
