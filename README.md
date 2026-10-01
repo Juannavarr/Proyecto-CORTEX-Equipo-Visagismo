@@ -39,3 +39,83 @@ Citas específicas a fuentes oficiales cuando se mencionen requisitos variables 
 Solicitud de datos faltantes indispensables (p. ej., país de destino, nacionalidad, motivo del viaje).
 Declaración final
 Este mecanismo optimiza el tiempo de respuesta y mantiene la precisión en consultas complejas de visajismo.
+# 🗂️ Historial de recomendaciones
+
+## 🧠 1. Memoria a Largo Plazo (LTM)
+
+| Campo            | Tipo de dato | Descripción              | Ejemplo                  |
+| ---------------- | ------------ | ------------------------ | ------------------------ |
+| `id_memoria`     | INT          | Identificador de memoria | 001                      |
+| `tipo_memoria`   | VARCHAR      | Tipo de memoria          | Semántica / Episódica    |
+| `categoria`      | VARCHAR      | Categoría de información | Rostro / Cabello / Corte |
+| `dato`           | TEXT         | Información almacenada   | Tipo de rostro: Ovalado  |
+| `fecha_registro` | DATETIME     | Fecha de almacenamiento  | 2026-10-01               |
+
+---
+
+## 📚 2. Memoria Semántica
+
+| Campo              | Tipo de dato | Descripción                | Ejemplo                                   |
+| ------------------ | ------------ | -------------------------- | ----------------------------------------- |
+| `id_semantica`     | INT          | Identificador              | 001                                       |
+| `categoria`        | VARCHAR      | Categoría del conocimiento | Rostro                                    |
+| `tipo_rostro`      | VARCHAR      | Forma del rostro           | Ovalado                                   |
+| `tipo_cabello`     | VARCHAR      | Tipo de cabello            | Ondulado                                  |
+| `textura`          | VARCHAR      | Textura del cabello        | Grueso                                    |
+| `densidad`         | VARCHAR      | Densidad del cabello       | Media                                     |
+| `nombre_corte`     | VARCHAR      | Corte registrado           | Taper Fade                                |
+| `tipo_corte`       | VARCHAR      | Categoría del corte        | Taper                                     |
+| `altura_degradado` | VARCHAR      | Altura del fade            | Bajo                                      |
+| `volumen_superior` | VARCHAR      | Volumen del cabello        | Medio                                     |
+| `compatibilidad`   | VARCHAR      | Compatibilidad con rostro  | Alta                                      |
+| `codigo_intencion` | VARCHAR      | Intención reconocida       | `RECOMENDAR_CORTE`                        |
+| `palabras_clave`   | TEXT         | Palabras asociadas         | "qué corte me queda", "qué corte me hago" |
+| `regla_visajismo`  | TEXT         | Regla utilizada            | Mantener equilibrio visual del rostro     |
+
+### Ejemplos de conocimiento semántico
+
+| Tipo de rostro | Corte      | Compatibilidad | Regla                                 |
+| -------------- | ---------- | -------------- | ------------------------------------- |
+| Ovalado        | Taper Fade | Alta           | Mantiene proporciones equilibradas    |
+| Ovalado        | Mid Fade   | Alta           | Permite diferentes estilos superiores |
+| Redondo        | Taper Fade | Alta           | Favorece una apariencia más vertical  |
+| Redondo        | Mid Fade   | Alta           | Reduce visualmente el volumen lateral |
+| Cuadrado       | Mid Fade   | Alta           | Mantiene la estructura angular        |
+| Alargado       | Low Fade   | Media          | Puede conservar mayor volumen lateral |
+| Diamante       | Taper Fade | Alta           | Puede equilibrar los laterales        |
+| Corazón        | Low Fade   | Media          | Ayuda a equilibrar frente y mandíbula |
+
+---
+
+## 🧠 3. Memoria Episódica
+
+| Campo                 | Tipo de dato | Descripción                    | Ejemplo                          |
+| --------------------- | ------------ | ------------------------------ | -------------------------------- |
+| `id_episodio`         | INT          | Identificador del episodio     | 001                              |
+| `id_usuario`          | INT          | Identificador del usuario      | 001                              |
+| `consulta`            | TEXT         | Mensaje enviado por el usuario | "No sé qué corte me puedo hacer" |
+| `intencion`           | VARCHAR      | Intención detectada            | `RECOMENDAR_CORTE`               |
+| `tipo_rostro`         | VARCHAR      | Rostro identificado            | Ovalado                          |
+| `tipo_cabello`        | VARCHAR      | Tipo de cabello                | Ondulado                         |
+| `textura_cabello`     | VARCHAR      | Textura                        | Grueso                           |
+| `densidad_cabello`    | VARCHAR      | Densidad                       | Media                            |
+| `corte_recomendado`   | VARCHAR      | Corte recomendado              | Taper Fade                       |
+| `cortes_alternativos` | TEXT         | Otras opciones                 | Mid Fade, Low Fade               |
+| `preferencia_usuario` | TEXT         | Preferencia detectada          | Prefiere laterales cortos        |
+| `fecha`               | DATETIME     | Fecha de interacción           | 2026-10-01                       |
+## 🗂️ Carpetas de memoria del bot
+
+| Carpeta de memoria                  | Información que debe conservar                               | Ejemplos                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| 📐 **Tipos de rostro**              | Características y clasificación de las formas faciales       | Ovalado, redondo, cuadrado, rectangular, diamante, corazón, triangular                         |
+| 💇 **Tipos de cabello**             | Características del cabello                                  | Liso, ondulado, rizado, afro                                                                   |
+| 🧵 **Textura y densidad**           | Propiedades del cabello que afectan la elección del corte    | Fino, medio, grueso / baja, media, alta                                                        |
+| ✂️ **Catálogo de cortes**           | Información sobre los cortes disponibles                     | Taper Fade, Low Fade, Mid Fade, High Fade, Mullet, Burst Fade, French Crop, Buzz Cut, Undercut |
+| 📊 **Características de cortes**    | Propiedades de cada corte                                    | Altura del fade, volumen superior, volumen lateral, largo, mantenimiento                       |
+| 🎨 **Reglas de visajismo**          | Reglas para relacionar rostro, cabello y corte               | Rostro redondo → controlar volumen lateral; rostro alargado → conservar equilibrio lateral     |
+| 🔑 **Intenciones**                  | Acciones que puede solicitar el usuario                      | `RECOMENDAR_CORTE`, `ANALIZAR_ROSTRO`, `CONSULTAR_CORTE`, `COMPARAR_CORTES`                    |
+| 🗣️ **Palabras clave**              | Palabras y frases utilizadas para identificar intenciones    | "qué corte me queda", "qué corte me hago", "tipo de rostro", "Taper Fade"                      |
+| ⭐ **Compatibilidad**                | Relación entre tipos de rostro y cortes                      | Rostro ovalado + Taper Fade → compatibilidad alta                                              |
+| 🧴 **Cuidado y mantenimiento**      | Información sobre mantenimiento de cada estilo               | Frecuencia de corte, productos, peinado                                                        |
+| 👤 **Preferencias del usuario**     | Preferencias que pueden personalizar futuras recomendaciones | Prefiere laterales cortos, no quiere mucho volumen, prefiere estilos modernos                  |
+| 💬 **Historial de recomendaciones** | Recomendaciones realizadas anteriormente                     | Corte recomendado, alternativas y motivo de la recomendación                                   |
