@@ -119,3 +119,184 @@ Este mecanismo optimiza el tiempo de respuesta y mantiene la precisión en consu
 | 🧴 **Cuidado y mantenimiento**      | Información sobre mantenimiento de cada estilo               | Frecuencia de corte, productos, peinado                                                        |
 | 👤 **Preferencias del usuario**     | Preferencias que pueden personalizar futuras recomendaciones | Prefiere laterales cortos, no quiere mucho volumen, prefiere estilos modernos                  |
 | 💬 **Historial de recomendaciones** | Recomendaciones realizadas anteriormente                     | Corte recomendado, alternativas y motivo de la recomendación                                   |
+"""
+Asistente de visajismo - Memoria LTM + RAM + Regla de Olvido
+Pegar completo en un archivo: bot.py
+"""
+
+import os
+import json
+from datetime import datetime, timedelta
+
+import redis
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from openai import OpenAI
+
+# ─────────── CONFIG ───────────
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+POSTGRES_URL = os.getenv("POSTGRES_URL", "postgresql://user:pass@localhost/visas")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+RAM_TTL_SECONDS = 600      # 10 min inactividad → borra RAM
+MAX_TURNOS_RAM = 30        # comprime si supera 30 turnos
+DIAS_RETENCION_LTM = 90    # purga LTM a los 90 días
+TOP_K_LTM = 5
+
+redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+# ─────────── RAM ───────────
+def _ram_key(user_id, session_id):
+    return f"ram:{user_id}:{session_id}"
+
+
+def get_ram(user_id, session_id):
+    data = redis_client.get(_ram_key(user_id, session_id))
+    return json.loads(data) if data else []
+
+
+def save_ram(user_id, session_id, turnos):
+    if len(turnos) > MAX_TURNOS_RAM:
+        antiguos = turnos[:-10]
+        resumen = "[RESUMEN PREVIO] " + " | ".join(
+            f"{t['role']}: {t['content'][:80]}" for t in antiguos
+        )
+        turnos = [{"role": "system", "content": resumen}] + turnos[-10:]
+    # TTL: la regla de olvido se aplica sola aquí
+    redis_client.setex(_ram_key(user_id, session_id),
+                       RAM_TTL_SECONDS,
+                       json.dumps(turnos, ensure_ascii=False))
+
+
+def clear_ram(user_id, session_id):
+    redis_client.delete(_ram_key(user_id, session_id))
+
+
+# ─────────── LTM ───────────
+def _conn():
+    return psycopg2.connect(POSTGRES_URL, cursor_factory=RealDictCursor)
+
+
+def embed(texto):
+    r = client.embeddings.create(model="text-embedding-3-small", input=texto)
+    return r.data[0].embedding
+
+
+def buscar_ltm(user_id, embedding, tema=None):
+    conn = _conn()
+    cur = conn.cursor()
+    if tema:
+        cur.execute("""
+            SELECT contenido, fuente, 1 - (embedding <=> %s::vector) AS sim
+            FROM ltm_usuario
+            WHERE user_id = %s AND (tema = %s OR tema IS NULL)
+            ORDER BY embedding <=> %s::vector LIMIT %s
+        """, (embedding, user_id, tema, embedding, TOP_K_LTM))
+    else:
+        cur.execute("""
+            SELECT contenido, fuente, 1 - (embedding <=> %s::vector) AS sim
+            FROM ltm_usuario
+            WHERE user_id = %s
+            ORDER BY embedding <=> %s::vector LIMIT %s
+        """, (embedding, user_id, embedding, TOP_K_LTM))
+    rows = cur.fetchall()
+    cur.close(); conn.close()
+    return [r for r in rows if r["sim"] > 0.7]
+
+
+def guardar_ltm(user_id, contenido, embedding, tema=None,
+                tipo="dato", fuente=None):
+    conn = _conn()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO ltm_usuario
+        (user_id, contenido, embedding, tema, tipo, fuente, fecha_actualizacion)
+        VALUES (%s, %s, %s, %s, %s, %s, NOW())
+    """, (user_id, contenido, embedding, tema, tipo, fuente))
+    conn.commit(); cur.close(); conn.close()
+
+
+# ─────────── REGLA DE OLVIDO ───────────
+def al_expirar_sesion(user_id, session_id):
+    """Antes de que Redis borre la RAM, rescata lo importante a LTM."""
+    turnos = get_ram(user_id, session_id)
+    if not turnos:
+        return
+    texto = "\n".join(f"{t['role']}: {t['content']}" for t in turnos)
+    r = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Extrae SOLO: datos personales, "
+             "casos pendientes, preferencias. Máximo 3 líneas."},
+            {"role": "user", "content": texto}
+        ]
+    )
+    resumen = r.choices[0].message.content
+    guardar_ltm(user_id, resumen, embed(resumen), tipo="resumen_sesion")
+
+
+def purgar_ltm_antigua():
+    """Job diario: borra LTM con más de DIAS_RETENCION_LTM días."""
+    conn = _conn(); cur = conn.cursor()
+    cur.execute("DELETE FROM ltm_usuario WHERE fecha_actualizacion < %s",
+                (datetime.now() - timedelta(days=DIAS_RETENCION_LTM),))
+    conn.commit(); cur.close(); conn.close()
+
+
+# ─────────── FASE 2 + FASE 3 ───────────
+def clasificar(pregunta):
+    r = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": 'Devuelve JSON: '
+             '{"intencion": "...", "entidad": "...", "tema": "..."}'},
+            {"role": "user", "content": pregunta}
+        ]
+    )
+    return json.loads(r.choices[0].message.content)
+
+
+def responder(pregunta, user_id, session_id):
+    # 1. RAM actual
+    ram = get_ram(user_id, session_id)
+
+    # 2. FASE 2: clasificar
+    meta = clasificar(pregunta)
+    tema = meta.get("tema")
+
+    # 3. FASE 3: buscar en LTM
+    emb = embed(pregunta)
+    docs = buscar_ltm(user_id, emb, tema=tema)
+    ctx = "\n".join(f"- {d['contenido']}" for d in docs) \
+        if docs else "Sin info previa del usuario."
+
+    # 4. Construir prompt
+    mensajes = [
+        {"role": "system", "content": "Eres un asistente experto en visajismo."},
+        {"role": "system", "content": f"[CONTEXTO LTM]\n{ctx}"},
+    ] + ram + [{"role": "user", "content": pregunta}]
+
+    # 5. Responder
+    r = client.chat.completions.create(model="gpt-4o-mini", messages=mensajes)
+    respuesta = r.choices[0].message.content
+
+    # 6. Actualizar RAM (TTL se renueva)
+    ram.append({"role": "user", "content": pregunta})
+    ram.append({"role": "assistant", "content": respuesta})
+    save_ram(user_id, session_id, ram)
+
+    return respuesta
+
+
+# ─────────── USO ───────────
+if __name__ == "__main__":
+    r = responder(
+        pregunta="¿Necesito cita para visa Canadá?",
+        user_id="573001234567",
+        session_id="573001234567_1730000000"
+    )
+    print(r)
+  
