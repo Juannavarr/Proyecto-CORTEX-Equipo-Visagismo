@@ -303,3 +303,4 @@ if __name__ == "__main__":
 <img width="1920" height="1080" alt="Diagrama de detección de sarcasmo" src="https://github.com/user-attachments/assets/772a85b8-caad-4d7c-b647-18627df1a8e1" />
 <img width="1920" height="1080" alt="Diagrama de detección de sarcasmo (3)" src="https://github.com/user-attachments/assets/3dc15455-8f26-4c89-8139-f9177fa352f8" />
 <img width="1920" height="1080" alt="Diagrama de detección de sarcasmo (1)" src="https://github.com/user-attachments/assets/6fd8818c-8e51-4c58-8aa3-4ea9d56ed6f6" />
+<img width="3120" height="6404" alt="image" src="https://github.com/user-attachments/assets/922bdfe6-f1c0-4d7b-8e21-be73aa518bdd" />
