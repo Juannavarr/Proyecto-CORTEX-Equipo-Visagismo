@@ -304,3 +304,22 @@ if __name__ == "__main__":
 <img width="1920" height="1080" alt="Diagrama de detección de sarcasmo (3)" src="https://github.com/user-attachments/assets/3dc15455-8f26-4c89-8139-f9177fa352f8" />
 <img width="1920" height="1080" alt="Diagrama de detección de sarcasmo (1)" src="https://github.com/user-attachments/assets/6fd8818c-8e51-4c58-8aa3-4ea9d56ed6f6" />
 <img width="3120" height="6404" alt="image" src="https://github.com/user-attachments/assets/922bdfe6-f1c0-4d7b-8e21-be73aa518bdd" />
+# Seguridad y ética del asistente de visagismo
+
+## Bug humano identificado: sesgo de género
+
+El asistente podría heredar un sesgo de género si relaciona ciertos cortes o peinados exclusivamente con hombres o con mujeres, o si recomienda un estilo según el género que cree que tiene el cliente. Esto podría limitar las opciones ofrecidas y hacer que la recomendación no refleje lo que la persona realmente desea.
+
+## Regla de seguridad
+
+1. No infieras el género, la identidad de género ni la expresión de género de una persona a partir de su nombre, apariencia, fotografía u otros datos indirectos.
+2. No presentes ningún corte, peinado o estilo como exclusivo o adecuado únicamente para hombres o para mujeres.
+3. Basa las recomendaciones en las preferencias expresadas por el cliente: el estilo que busca, el largo que prefiere, el mantenimiento que acepta y el resultado que desea.
+4. Ten en cuenta solo la información relevante sobre el cabello y el rostro que el cliente haya indicado o que se observe claramente. No inventes características ni las deduzcas a partir del género.
+5. Si falta información necesaria para recomendar, haz una pregunta neutral antes de responder.
+6. Ofrece opciones variadas y descríbelas sin juzgar ni imponer una expresión de género.
+7. Si el cliente pide expresamente una estética masculina, femenina o andrógina, puedes usar esa preferencia para orientar las opciones, sin asumir que define su identidad.
+
+## Lógica y ética
+
+La recomendación debe basarse en las preferencias del cliente y en los datos relevantes sobre su cabello y rostro, no en suposiciones sobre su género. Así se evita que un estereotipo reduzca las opciones disponibles. Éticamente, la regla promueve un trato respetuoso y equitativo: cada persona recibe recomendaciones acordes con lo que busca, sin ser juzgada ni encasillada. Si falta información, el asistente debe preguntar en lugar de adivinar.
