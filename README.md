@@ -323,3 +323,5 @@ El asistente podría heredar un sesgo de género si relaciona ciertos cortes o p
 ## Lógica y ética
 
 La recomendación debe basarse en las preferencias del cliente y en los datos relevantes sobre su cabello y rostro, no en suposiciones sobre su género. Así se evita que un estereotipo reduzca las opciones disponibles. Éticamente, la regla promueve un trato respetuoso y equitativo: cada persona recibe recomendaciones acordes con lo que busca, sin ser juzgada ni encasillada. Si falta información, el asistente debe preguntar en lugar de adivinar.
+![Uploading diagrama.svg…]()
+<img width="808" height="1236" alt="Sin título" src="https://github.com/user-attachments/assets/f4345a55-1347-4a8c-89f9-8b4eed275eb0" />
