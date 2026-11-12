@@ -4,7 +4,7 @@ Este repositorio documenta el diseño de un asistente virtual de barbería basad
 
 ## Semana 1 — Setup del entorno
 
-El repositorio es público y cuenta con este `README.md`. **Pendiente:** agregar el nombre del equipo y los integrantes; esos datos no aparecen en el material revisado. [Ver detalle de la semana 1](docs/fase-1/semana-1-entorno.md).
+El repositorio es público y cuenta con este `README.md`. **Nombre del equipo:** Proyecto-CORTEX-Equipo-Visagismo. **Pendiente:** agregar los nombres de los integrantes. [Ver detalle de la semana 1](docs/fase-1/semana-1-entorno.md).
 
 ## 1. Perfil del Agente
 

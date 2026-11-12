@@ -10,12 +10,12 @@
 
 El repositorio [`Proyecto-CORTEX-Equipo-Visagismo`](https://github.com/Juannavarr/Proyecto-CORTEX-Equipo-Visagismo) es público y ya tiene un `README.md` con el nombre del proyecto y una descripción inicial del asistente.
 
-**Pendiente de completar:** el material revisado no incluye el nombre formal del equipo ni una lista de integrantes. No se inventan esos datos; agréguenlos aquí cuando el equipo los confirme.
+El nombre del equipo es **Proyecto-CORTEX-Equipo-Visagismo**. **Pendiente de completar:** agregar los nombres de sus integrantes, que aún no se han proporcionado.
 
 ```markdown
 ## Equipo
 
-- Nombre del equipo: [pendiente]
+- Nombre del equipo: Proyecto-CORTEX-Equipo-Visagismo
 - Integrantes:
   - [nombre]
 ```
