@@ -10,14 +10,14 @@
 
 El repositorio [`Proyecto-CORTEX-Equipo-Visagismo`](https://github.com/Juannavarr/Proyecto-CORTEX-Equipo-Visagismo) es público y ya tiene un `README.md` con el nombre del proyecto y una descripción inicial del asistente.
 
-El nombre del equipo es **Proyecto-CORTEX-Equipo-Visagismo**. **Pendiente de completar:** agregar los nombres de sus integrantes, que aún no se han proporcionado.
+El nombre del equipo es **Proyecto-CORTEX-Equipo-Visagismo**. El integrante registrado es **Juan Navarro**.
 
 ```markdown
 ## Equipo
 
 - Nombre del equipo: Proyecto-CORTEX-Equipo-Visagismo
 - Integrantes:
-  - [nombre]
+  - Juan Navarro
 ```
 
 ## Propósito del proyecto registrado
