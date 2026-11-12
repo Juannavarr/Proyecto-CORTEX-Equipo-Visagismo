@@ -1,10 +1,9 @@
 # Material pendiente de clasificar
 
-La reorganización actual se limita a las Fases 1 y 2. Los contenidos listados aquí se conservan en la [copia íntegra del README anterior](README-original.md) y no se les asigna una semana hasta revisar las guías restantes.
+La organización llega ahora hasta la **Fase 3, Semana 9**. Las tablas de memoria y el prototipo RAM/LTM ya están ubicados en la Semana 9; la ventana cognitiva y el límite de contexto están en la Semana 8. Los elementos que siguen aquí se conservan en la [copia íntegra del README anterior](README-original.md) y esperan las guías restantes.
 
-- Tablas de memoria a largo plazo, memoria semántica y memoria episódica.
-- Propuesta de carpetas/categorías de memoria del bot.
-- Código de ejemplo que implementa RAM, LTM, Redis, PostgreSQL y llamadas a modelos.
+- [Fase 3, Semana 8 — La RAM cognitiva](fase-3/semana-8-ventana-de-contexto.md).
+- [Fase 3, Semana 9 — El Bibliotecario](fase-3/semana-9-recuperacion-y-olvido.md).
 - Diagramas de detección de sarcasmo, manejo de ambigüedad y ejemplos de diálogo.
 - Sección de seguridad y ética sobre sesgo de género, junto con su diagrama.
 - Diagrama horizontal panorámico cuyo título o contenido no permite confirmar con seguridad la semana.

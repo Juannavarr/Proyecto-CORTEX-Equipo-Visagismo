@@ -76,15 +76,29 @@ Solicitud de datos faltantes indispensables (p. ej., país de destino, nacionali
 Declaración final
 Este mecanismo optimiza el tiempo de respuesta y mantiene la precisión en consultas complejas de visajismo.
 
-## Material conservado — fase y semana por confirmar
+## Fase 3 — Memoria y recuperación (Semanas 8–9)
 
-Los siguientes contenidos estaban en el README original y se mantienen visibles aquí mientras se reciben las guías de las fases posteriores. No se borran ni se les asigna una semana sin confirmación.
+### Semana 8 — La RAM cognitiva: memoria de trabajo y carga cognitiva
 
-### Diagrama panorámico sin semana confirmada
+La consigna usa **7±2** como referencia didáctica. Para el proyecto se elige una ventana operativa de **7 mensajes recientes**. Cuando llega el octavo, se resume el contexto útil del mensaje más antiguo y se conserva un resumen breve junto a los siete mensajes recientes. El número describe esta política del bot; no es el límite técnico de tokens del modelo.
+
+![Ventana de RAM con siete mensajes recientes y resumen del contexto anterior](docs/fase-3/diagramas/ventana-contexto.png)
+
+[Documento de la Semana 8](docs/fase-3/semana-8-ventana-de-contexto.md) · [Fuente Mermaid editable](docs/fase-3/diagramas/ventana-contexto.mmd)
+
+### Semana 9 — El Bibliotecario: procesos de recuperación y olvido
+
+El flujo clasifica la pregunta, busca hasta cinco recuerdos del mismo usuario en LTM (similitud `> 0.70`), combina resultados pertinentes con el resumen y los siete mensajes recientes, responde y renueva el temporizador. Tras **10 minutos sin actividad**, cierra la sesión: guarda en LTM solo preferencias duraderas con consentimiento y vacía la RAM; sin consentimiento, solo la vacía. La retención LTM existente es de 90 días.
+
+![Flujo de recuperación en LTM y cierre por diez minutos de inactividad](docs/fase-3/diagramas/recuperacion-olvido.png)
+
+[Documento de la Semana 9](docs/fase-3/semana-9-recuperacion-y-olvido.md) · [Fuente Mermaid editable](docs/fase-3/diagramas/recuperacion-olvido.mmd)
+
+#### Material visual adicional sin semana confirmada
 
 <img width="2496" height="400" alt="Mi primer tablero (1)" src="https://github.com/user-attachments/assets/d47a61f3-b7fa-4b37-880d-ff8ce7e4f18b" />
 
-### Memoria e historial de recomendaciones
+#### Tablas e historial de memoria existentes
 
 # 🗂️ Historial de recomendaciones
 
@@ -167,9 +181,9 @@ Los siguientes contenidos estaban en el README original y se mantienen visibles 
 | 👤 **Preferencias del usuario**     | Preferencias que pueden personalizar futuras recomendaciones | Prefiere laterales cortos, no quiere mucho volumen, prefiere estilos modernos                  |
 | 💬 **Historial de recomendaciones** | Recomendaciones realizadas anteriormente                     | Corte recomendado, alternativas y motivo de la recomendación                                   |
 
-### Código de ejemplo del asistente
+#### Código de ejemplo del asistente — ventana RAM actualizada
 
-El siguiente bloque se conserva como estaba en el README original; no se ha ejecutado ni revisado funcionalmente.
+El prototipo ya contemplaba TTL de 10 minutos y recuperación LTM. Se actualiza aquí el límite de RAM a siete mensajes y el cierre respeta el consentimiento para guardar preferencias. **Aún falta conectar `al_expirar_sesion` a un evento de expiración o verificación programada:** Redis TTL por sí solo no ejecuta esa función. El código sigue siendo un ejemplo y no se ha desplegado.
 
 ```python
 """
@@ -192,7 +206,7 @@ POSTGRES_URL = os.getenv("POSTGRES_URL", "postgresql://user:pass@localhost/visas
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 RAM_TTL_SECONDS = 600      # 10 min inactividad → borra RAM
-MAX_TURNOS_RAM = 30        # comprime si supera 30 turnos
+MAX_MENSAJES_RAM = 7       # conserva los 7 mensajes recientes
 DIAS_RETENCION_LTM = 90    # purga LTM a los 90 días
 TOP_K_LTM = 5
 
@@ -211,13 +225,13 @@ def get_ram(user_id, session_id):
 
 
 def save_ram(user_id, session_id, turnos):
-    if len(turnos) > MAX_TURNOS_RAM:
-        antiguos = turnos[:-10]
+    if len(turnos) > MAX_MENSAJES_RAM:
+        antiguos = turnos[:-MAX_MENSAJES_RAM]
         resumen = "[RESUMEN PREVIO] " + " | ".join(
             f"{t['role']}: {t['content'][:80]}" for t in antiguos
         )
-        turnos = [{"role": "system", "content": resumen}] + turnos[-10:]
-    # TTL: la regla de olvido se aplica sola aquí
+        turnos = [{"role": "system", "content": resumen}] + turnos[-MAX_MENSAJES_RAM:]
+    # Redis elimina la clave al vencer el TTL, pero no ejecuta el finalizador.
     redis_client.setex(_ram_key(user_id, session_id),
                        RAM_TTL_SECONDS,
                        json.dumps(turnos, ensure_ascii=False))
@@ -272,22 +286,24 @@ def guardar_ltm(user_id, contenido, embedding, tema=None,
 
 
 # ─────────── REGLA DE OLVIDO ───────────
-def al_expirar_sesion(user_id, session_id):
-    """Antes de que Redis borre la RAM, rescata lo importante a LTM."""
+# Invocar con un temporizador de aplicación antes de que venza el TTL de Redis.
+def al_expirar_sesion(user_id, session_id, consentimiento_memoria=False):
+    """Guarda preferencias duraderas solo con consentimiento y siempre vacía la RAM."""
     turnos = get_ram(user_id, session_id)
-    if not turnos:
-        return
-    texto = "\n".join(f"{t['role']}: {t['content']}" for t in turnos)
-    r = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Extrae SOLO: datos personales, "
-             "casos pendientes, preferencias. Máximo 3 líneas."},
-            {"role": "user", "content": texto}
-        ]
-    )
-    resumen = r.choices[0].message.content
-    guardar_ltm(user_id, resumen, embed(resumen), tipo="resumen_sesion")
+    if turnos and consentimiento_memoria:
+        texto = "\n".join(f"{t['role']}: {t['content']}" for t in turnos)
+        r = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Extrae solo preferencias de estilo "
+                 "y casos pendientes. No infieras género ni guardes datos sensibles. Máximo 3 líneas."},
+                {"role": "user", "content": texto}
+            ]
+        )
+        resumen = r.choices[0].message.content
+        if resumen and resumen.strip():
+            guardar_ltm(user_id, resumen, embed(resumen), tipo="preferencias_sesion")
+    clear_ram(user_id, session_id)
 
 
 def purgar_ltm_antigua():
@@ -354,9 +370,9 @@ if __name__ == "__main__":
     print(r)
 ```
 
-### Diagramas y ejemplos adicionales sin semana confirmada
+## Material complementario — Fase y semana por confirmar
 
-El README anterior tenía estos marcadores de carga sin imagen asociada; se conservan como texto para dejar constancia de ellos:
+Estos materiales siguen visibles y conservados; aún no se han asignado a una semana de las guías recibidas:
 
 `  ![Uploading flujo-sarcasmo.png…]()`
 
@@ -392,4 +408,4 @@ El asistente podría heredar un sesgo de género si relaciona ciertos cortes o p
 
 La recomendación debe basarse en las preferencias del cliente y en los datos relevantes sobre su cabello y rostro, no en suposiciones sobre su género. Así se evita que un estereotipo reduzca las opciones disponibles. Éticamente, la regla promueve un trato respetuoso y equitativo: cada persona recibe recomendaciones acordes con lo que busca, sin ser juzgada ni encasillada. Si falta información, el asistente debe preguntar en lugar de adivinar.
 
-La copia íntegra del README anterior también permanece en [`docs/README-original.md`](docs/README-original.md). Los documentos detallados por semana siguen disponibles en `docs/fase-1/` y `docs/fase-2/`; el resumen conjunto está en [`docs/organizacion-por-fases.md`](docs/organizacion-por-fases.md).
+La copia íntegra del README anterior permanece en [`docs/README-original.md`](docs/README-original.md). Los documentos detallados están en `docs/fase-1/`, `docs/fase-2/` y [`docs/fase-3/`](docs/fase-3/README.md); el resumen por fases está en [`docs/organizacion-por-fases.md`](docs/organizacion-por-fases.md).

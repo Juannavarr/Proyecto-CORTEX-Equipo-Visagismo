@@ -50,12 +50,20 @@ Este documento reúne en un solo lugar las fases que ya se pudieron organizar y 
 
 **Pendiente de aclaración:** el bloque original incluye términos sobre visas, consulados y países, aunque su título lo presenta como una regla para el asistente de visagismo. Esas referencias se preservan sin reinterpretación hasta conocer el contexto de las otras fases.
 
+## Fase 3 — Memoria y recuperación (Semanas 8–9)
+
+### Semana 8 — La RAM cognitiva
+
+Se usa **7±2** como referencia didáctica y se fija una ventana de **7 mensajes recientes**. Al llegar un nuevo mensaje que supera el límite, se comprime lo más antiguo en un resumen y se conservan los siete más recientes. El límite de siete es una regla de diseño, no el límite técnico de tokens del modelo. [Documento y diagrama](fase-3/semana-8-ventana-de-contexto.md).
+
+### Semana 9 — El Bibliotecario
+
+El prototipo ya tiene búsqueda LTM por usuario/tema, `TOP_K_LTM = 5`, similitud `> 0.70`, retención de 90 días y expiración RAM de 10 minutos. La política define cómo combinar recuerdos y contexto actual, y borrar RAM tras la inactividad. Falta conectar el finalizador a un temporizador real antes de que expire la clave Redis. [Documento y diagrama](fase-3/semana-9-recuperacion-y-olvido.md).
+
 ## Material que todavía no se ha podido asignar a una fase
 
-No se han recibido las guías de las fases posteriores a la Fase 2. Por eso, estos elementos se conservan como **pendientes de clasificar**, sin adjudicarles una semana:
+Las guías recibidas llegan hasta la Semana 9. Estos otros elementos se conservan como **pendientes de clasificar**, sin adjudicarles una semana:
 
-- Tablas de memoria a largo plazo, semántica y episódica, y categorías/carpetas de memoria.
-- Bloque de código de ejemplo con Redis, PostgreSQL, RAM, LTM y llamadas a modelos.
 - Diagramas complementarios de sarcasmo, manejo de ambigüedad y ejemplos de diálogo.
 - Material sobre sesgo de género, seguridad y ética, junto con su diagrama.
 - Diagrama horizontal panorámico cuyo título no permite identificar con seguridad su semana.

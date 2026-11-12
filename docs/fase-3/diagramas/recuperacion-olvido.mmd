@@ -1,0 +1,27 @@
+flowchart TB
+    IN["Entra una pregunta nueva"] --> C["Fase 2: detectar intención y tema"]
+    C --> E["Crear embedding de la pregunta"]
+    E --> Q["Buscar en LTM por usuario y tema"]
+    Q --> R["Ordenar por similitud y tomar hasta 5 resultados"]
+    R --> V{"¿Hay resultados con similitud > 0.70 y vigentes?"}
+    V -- "Sí" --> CTX["Construir contexto: instrucciones + resumen + últimos 7 mensajes + recuerdos pertinentes"]
+    V -- "No" --> CTX0["Construir contexto: instrucciones + resumen + últimos 7 mensajes; no inventar recuerdos"]
+    CTX --> GEN["Generar respuesta"]
+    CTX0 --> GEN
+    GEN --> APP["Guardar turno y limitar RAM a 7 mensajes recientes"]
+    APP --> TIMER["Reiniciar temporizador de inactividad: 10 minutos"]
+    TIMER -->|"Llega otro mensaje"| IN
+    TIMER -->|"10 min sin actividad"| CONS{"¿Hay consentimiento para guardar preferencias duraderas?"}
+    CONS -- "Sí" --> SAVE["Extraer solo preferencias útiles y casos pendientes; no guardar fotos crudas"]
+    SAVE --> LTM["Guardar en LTM con retención de 90 días"]
+    LTM --> CLEAR["Vaciar RAM de la sesión"]
+    CONS -- "No" --> CLEAR
+
+    classDef input fill:#e8f1ff,stroke:#3168a6,color:#142b45
+    classDef process fill:#f4f6f8,stroke:#667788,color:#202a33
+    classDef memory fill:#e8f5ec,stroke:#4e8b62,color:#173b22
+    classDef decision fill:#fff1cf,stroke:#c28b1c,color:#3e2f08
+    classDef final fill:#f2eaff,stroke:#7757a5,color:#302044
+    class IN input
+    class C,E,Q,R,CTX,CTX0,GEN,APP,TIMER,SAVE,LTM,CLEAR process
+    class V,CONS decision

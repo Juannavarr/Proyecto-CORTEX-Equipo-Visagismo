@@ -1,0 +1,27 @@
+flowchart TB
+    N["Nuevo mensaje del usuario"] --> L{"¿Ya hay 7 mensajes recientes en RAM?"}
+    L -- "No" --> A["Agregar el mensaje a la ventana"]
+    L -- "Sí" --> S["Resumir la información útil del mensaje más antiguo"]
+    S --> D["Retirar el mensaje antiguo y conservar el resumen"]
+    D --> A
+    A --> R
+
+    subgraph R["RAM cognitiva — ventana de trabajo"]
+        direction TB
+        SUM["Resumen breve de contexto anterior"]
+        M1["Mensaje 1 · más antiguo"] --> M2["Mensaje 2"] --> M3["Mensaje 3"] --> M4["Mensaje 4"] --> M5["Mensaje 5"] --> M6["Mensaje 6"] --> M7["Mensaje 7 · más reciente"]
+        SUM -. "contexto comprimido" .-> M1
+    end
+
+    R --> T["Reiniciar temporizador de inactividad: 10 minutos"]
+    T -->|"Se cumple el límite"| F["Finalizar sesión: conservar solo el resumen permitido y vaciar RAM"]
+    T -->|"Llega otro mensaje"| N
+
+    classDef input fill:#e8f1ff,stroke:#3168a6,color:#142b45
+    classDef rule fill:#fff1cf,stroke:#c28b1c,color:#3e2f08
+    classDef memory fill:#e8f5ec,stroke:#4e8b62,color:#173b22
+    classDef action fill:#f2eaff,stroke:#7757a5,color:#302044
+    class N input
+    class L rule
+    class SUM,M1,M2,M3,M4,M5,M6,M7 memory
+    class S,D,A,T,F action
